@@ -23,13 +23,16 @@ struct d_link {
 };
 
 struct d_node {
-    const char     *name;      /* name of this node, must be unique */
+	/* we put first the pointers, then the integers, to conserve
+	 * alignment space. */
+    char     	   *name;      /* name of this node, must be unique */
     struct d_link  *next;      /* set of next nodes */
     struct d_node  *back;      /* pointer back to last node */
-    struct d_node  *nfrontier; /* next node in the frontier */
+	struct d_graph *graph;	   /* graph this node belongs to */
     int             next_n;    /* number of next nodes */
     int             next_cap;  /* capacity of next array */
 	int				flags;	   /* flags for this node */
+	int				cost;	   /* cost to reach this node */
 };
 
 /**
@@ -44,8 +47,8 @@ struct d_node {
  *         case it is not possible to allocate one.
  */
 struct d_graph *
-g_new_graph(
-        const char *name);
+d_new_graph(
+        char       *name);
 
 /**
  * Add link to the graph.
@@ -63,8 +66,8 @@ g_new_graph(
  *           if no memory is available or a link already exists
  *           for the requested source and destination.
  */
-int
-g_add_link(
+struct d_link *
+d_add_link(
         struct d_node    *from,
         struct d_node    *to,
         int               weight);
@@ -78,10 +81,24 @@ g_add_link(
  * @param name is the name of the node we are searching for.
  * @return a reference to the just located node.
  */
-struct node *
-g_lookup_node(
+struct d_node *
+d_lookup_node(
         struct d_graph   *graph,
         const char       *name);
+
+/**
+ * Sorts the links of the nodes from lower weight to larger.
+ *
+ * This function navigates all the nodes of the graph, sorting
+ * the links by weight in ascending order.  This allows to
+ * select the next link to compete for the smallest grow in
+ * total cost.
+ *
+ * @param graph is the graph to be navigated.
+ */
+void
+d_sort(
+		struct d_graph 			*graph);
 
 /**
  * Reset the node to start a new Dijkstra.
@@ -96,7 +113,7 @@ g_lookup_node(
  * @param graph is the reference to the graph to be reset.
  */
 void
-g_reset(
+d_reset(
         struct d_graph   *graph);
 
 /**
@@ -111,9 +128,9 @@ g_reset(
  * @return the number of characters printed.
  */
 ssize_t
-g_print(
-        struct d_graph   *graph,
-        FILE             *out);
+d_print_graph(
+		struct d_graph   *graph,
+		FILE 			 *out);
 
 /**
  * Print the route from the origin to the specified destination.
@@ -130,7 +147,7 @@ g_print(
  *         stream.
  */
 ssize_t
-print_route(
+d_print_route(
         FILE             *file,
         struct d_node    *destination);
 

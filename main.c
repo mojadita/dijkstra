@@ -35,13 +35,14 @@ void process(FILE *f, char *name)
 {
 	char line[256];
 	int lineno = 0;
-	struct d_graph *g = g_new_graph();
+	struct d_graph *g = d_new_graph(name);
 
 	while (fgets(line, sizeof line, f)) {
 		++lineno;
 
+		char *p = strtok(line, "\n");
 		/* first param is source node */
-		char *from = strtok(line, SEP_STRING);
+		char *from = strtok(p, SEP_STRING);
 		if (!from || from[0] == '#') continue;
 
 		/* second param is destination node */
@@ -55,21 +56,17 @@ void process(FILE *f, char *name)
 
 		/* now, the weight of the arc */
 		int weight = 1; /* default weight */
-		char *rest = strtok(line, FINALSEP_STRING);
+		char *rest = strtok(NULL, FINALSEP_STRING);
 		if (rest) {
 			sscanf(rest, "%d", &weight);
 		}
-		if ((res = g_add_link(
-                        g_lookup_node(g, from),
-                        g_lookup_node(g, to),
-                        weight)) != 0) {
-			fprintf(stderr,
-					"WARNING: add_link(%s, %s) => %d\n",
-					from, to, weight);
-		}
+		d_add_link(
+        		d_lookup_node(g, from),
+                d_lookup_node(g, to),
+                weight);
 	}
-	init_dijkstra(g);
-	free_dijkstra(g);
+	d_sort(g);
+	d_print_graph(g, stdout);
 }
 	
 
@@ -115,7 +112,7 @@ int main(int argc, char **argv)
 			}
 		}
 	} else {
-		process(stdin, STDIN_NAME)
+		process(stdin, STDIN_NAME);
 	}
 	exit(EXIT_SUCCESS);
 }

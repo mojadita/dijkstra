@@ -4,7 +4,7 @@
 # Copyright: (C) 2020 Luis Colorado.  All rights reserved.
 # License: BSD.
 
-targets				= dijkstra reverse
+targets				= dijkstra
 toclean				= $(targets)
 RM				   ?= rm -f
 
@@ -12,21 +12,12 @@ all: $(targets)
 clean:
 	$(RM) $(toclean)
 
-dijkstra_deps   	= avl_c
+dijkstra_deps   	= 
 dijkstra_objs   	= main.o dijkstra.o
-dijkstra_libs		= 
-dijkstra_ldflags	=
+dijkstra_libs		= -lavl
+dijkstra_ldflags	= -Lavl_c
 
-reverse_deps		=
-reverse_objs		= reverse.o
-reverse_libs		=
-reverse_ldflags		=
+toclean			   += $(dijkstra_objs)
 
-.for t in $(targets)
-toclean			   += $($t_objs)
-$t: $($t_deps) $($t_objs)
+dijkstra: $(dijkstra_deps) $(dijkstra_objs)
 	$(CC) $(LDFLAGS) $($@_ldflags) -o $@ $($@_objs) $($@_libs)
-.endfor
-
-avl_c:
-	$(MAKE) -C $@
