@@ -36,7 +36,6 @@ void process(FILE *f, char *name)
 	char line[256];
 	int lineno = 0;
 	struct d_graph *g = g_new_graph();
-    struct g_node *f = NULL, *t = NULL;
 
 	while (fgets(line, sizeof line, f)) {
 		++lineno;
@@ -60,9 +59,6 @@ void process(FILE *f, char *name)
 		if (rest) {
 			sscanf(rest, "%d", &weight);
 		}
-        if (!f) {
-            f = g_lookup_node(g, from);
-        }
 		if ((res = g_add_link(
                         g_lookup_node(g, from),
                         g_lookup_node(g, to),

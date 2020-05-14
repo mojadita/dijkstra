@@ -6,9 +6,15 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
+
 #include <avl.h>
 
 #include "dijkstra.h"
+
+#define FLAG_NEEDS_SORT		(1 << 0)
+#define FLAG_ALREADY_RUN	(1 << 1)
+#define FLAG_FRONTIER		(1 << 2)
 
 struct d_graph {
 	char          	*name; 	   /* name of this graph */
@@ -18,14 +24,18 @@ struct d_graph {
 
 #define DEFAULT_CAP		4
 
-struct d_graph *d_new_graph(const char *name)
+struct d_graph *
+d_new_graph(
+		const char *name)
 {
 	struct d_graph *res = malloc(sizeof *res + strlen(name) + 1);
-	assert(res != NULL);
+	if (!res) return NULL;
+
 	strcpy((char *)(res + 1), name);
-	res->name = (char *)(res + 1);
-	res->db = new_avl_tree(
-			strcmp,
+	res->name = (char *)(res + 1); /* make it point to the extra
+									* bytes after the structure */
+	res->db = new_avl_tree( /* allocate the database instance */
+			strcmp,  /* comparator */
 			NULL,
 			NULL,
 			NULL);
@@ -33,35 +43,36 @@ struct d_graph *d_new_graph(const char *name)
 }
 
 struct d_link *
-add_link(
+g_add_link(
 		struct d_node 			*from,
 		struct d_node 			*to,
 		int			   			 weight)
 {
-	/* let's check the capacity */
+	/* let's check the capacity of the next array. */
 	if (from->next_n == from->next_cap) {
 		/* need to expand */
-		from->next_cap <<= 1;
-		from->next = realloc(
+		from->next_cap <<= 1;  /* double it */
+		from->next = realloc(  /* and extend */
 				from->next,
 				from->next_cap
 					* (sizeof *from->next));
         assert(from->next != NULL);
 	}
-	struct d_link *p = from->next + from->next_n++;
-	p->weight = weight;
-	p->from = from;
-	p->to = to;
+	struct d_link *res = from->next + from->next_n++;
+	res->weight = weight;
+	res->from = from;
+	res->to = to;
+	graph->flags |= FLAG_NEEDS_SORT;
 
-    return p;
+    return res;
 }
 
 struct d_node *
-lookup_node(
+g_lookup_node(
 		struct d_graph   		*graph,
 		const char     			*name)
 {
-	struct d_node *res = avl_tree_get(name);
+	struct d_node *res = avl_tree_get(graph->db, name);
 	if (!res) {
 		res = malloc(strlen(name) + 1 + sizeof *res);
 		avl_tree_put(name, res);
@@ -84,25 +95,3 @@ cmp_node(const void *a, const void *b)
 	return A->weight - B->weight;
 }
 
-void d_sort()
-{
-	if (!nodes) {
-		nodes = new_avl_tree(
-				strcmp,
-				NULL,
-				NULL,
-				NULL);
-	}
-	AVL_ITERATOR it;
-	for (it = avl_tree_first(nodes); it; it = avl_it_next(it)) {
-		struct d_node *n = avl_iterator_data(it);
-		printf("Node [%s]:\n", n->name);
-		qsort(n->next, n->next_n, sizeof *n->next, cmp_node);
-		int i;
-		struct d_linkk *p;
-		for (i = 1, p = n->next; i <= n->next_n; ++i, ++p) {
-			printf("  %d: wgt=%d -> [%s]\n",
-					i, p->weight, p->next->name);
-		}
-	}
-}
