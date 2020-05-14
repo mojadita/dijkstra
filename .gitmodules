@@ -1,0 +1,3 @@
+[submodule "avl_c"]
+	path = avl_c
+	url = ssh://git@github.com/mojadita/avl_c
