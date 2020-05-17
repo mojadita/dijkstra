@@ -23,19 +23,19 @@ struct d_link {
 };
 
 struct d_node {
-	/* we put first the pointers, then the integers, to conserve
-	 * alignment space. */
-    char     	   *name;      /* name of this node, must be unique */
+    /* we put first the pointers, then the integers, to conserve
+     * alignment space. */
+    char           *name;      /* name of this node, must be unique */
     struct d_link  *next;      /* set of next nodes */
     struct d_node  *back;      /* pointer back to last node */
-	struct d_graph *graph;	   /* graph this node belongs to */
-	struct d_node  *fr_prev;   /* previous node in the frontier */
-	struct d_node  *fr_next;   /* next node in the frontier */
+    struct d_graph *graph;     /* graph this node belongs to */
+    struct d_node  *fr_prev;   /* previous node in the frontier */
+    struct d_node  *fr_next;   /* next node in the frontier */
     int             next_n;    /* number of next nodes */
     int             next_cap;  /* capacity of next array */
-	int				flags;	   /* flags for this node */
-	struct d_link  *next_l;	   /* next i to probe */
-	int				cost;	   /* cost to reach this node */
+    int             flags;     /* flags for this node */
+    struct d_link  *next_l;    /* next i to probe */
+    int             cost;      /* cost to reach this node */
 };
 
 /**
@@ -104,7 +104,7 @@ d_lookup_node(
  */
 void
 d_sort(
-		struct d_graph 			*graph);
+        struct d_graph          *graph);
 
 /**
  * Reset the node to start a new Dijkstra.
@@ -135,8 +135,8 @@ d_reset(
  */
 ssize_t
 d_print_graph(
-		struct d_graph   *graph,
-		FILE 			 *out);
+        struct d_graph   *graph,
+        FILE             *out);
 
 /**
  * Executes the algorithm on the graph given, with
@@ -153,18 +153,18 @@ d_print_graph(
  */
 int
 d_dijkstra(
-		struct d_graph	 *graph,
-		struct d_node	 *orig,
-		struct d_node	 *dest);
+        struct d_graph   *graph,
+        struct d_node    *orig,
+        struct d_node    *dest);
 
 int
 
 d_foreach_node(
-		struct d_graph	   *g,
-		int				  (*callback)(
-								struct d_node *,
-								void *),
-		void 			   *calldata);
+        struct d_graph     *g,
+        int               (*callback)(
+                                struct d_node *,
+                                void *),
+        void               *calldata);
 
 /**
  * Print the route from the origin to the specified destination.

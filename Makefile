@@ -4,20 +4,20 @@
 # Copyright: (C) 2020 Luis Colorado.  All rights reserved.
 # License: BSD.
 
-targets				= dijkstra
-toclean				= $(targets)
-RM				   ?= rm -f
+targets             = dijkstra
+toclean             = $(targets)
+RM                 ?= rm -f
 
 all: $(targets)
 clean:
 	$(RM) $(toclean)
 
-dijkstra_deps   	= 
-dijkstra_objs   	= main.o dijkstra.o
-dijkstra_libs		= -lavl
-dijkstra_ldflags	= -Lavl_c
+dijkstra_deps       =
+dijkstra_objs       = main.o dijkstra.o
+dijkstra_libs       = -lavl
+dijkstra_ldflags    = -Lavl_c
 
-toclean			   += $(dijkstra_objs)
+toclean            += $(dijkstra_objs)
 
 dijkstra: $(dijkstra_deps) $(dijkstra_objs)
 	$(CC) $(LDFLAGS) $($@_ldflags) -o $@ $($@_objs) $($@_libs)
