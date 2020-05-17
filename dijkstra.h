@@ -29,9 +29,12 @@ struct d_node {
     struct d_link  *next;      /* set of next nodes */
     struct d_node  *back;      /* pointer back to last node */
 	struct d_graph *graph;	   /* graph this node belongs to */
+	struct d_node  *fr_prev;   /* previous node in the frontier */
+	struct d_node  *fr_next;   /* next node in the frontier */
     int             next_n;    /* number of next nodes */
     int             next_cap;  /* capacity of next array */
 	int				flags;	   /* flags for this node */
+	struct d_link  *next_l;	   /* next i to probe */
 	int				cost;	   /* cost to reach this node */
 };
 
@@ -93,6 +96,9 @@ d_lookup_node(
  * the links by weight in ascending order.  This allows to
  * select the next link to compete for the smallest grow in
  * total cost.
+ * Normally, sort is needed when a graph is modified (some link
+ * has been added or deleted, as the vector of links on each node
+ * needs to be sorted for use in dijkstra algorithm.
  *
  * @param graph is the graph to be navigated.
  */
@@ -131,6 +137,34 @@ ssize_t
 d_print_graph(
 		struct d_graph   *graph,
 		FILE 			 *out);
+
+/**
+ * Executes the algorithm on the graph given, with
+ * orig as the origen and dest as the destination nodes.
+ *
+ * @param graph is the graph we are calculating for.
+ * @param orig is the origin node of paths.
+ * @param dest is the destination node, or NULL.  In case of
+ * passing NULL as destination, the algorithm continues until all
+ * nodes have been visited, so then you can show the minimum cost
+ * paths for all the nodes in the graph.
+ * @return the algorithm returns the number of passes make until
+ * finish.
+ */
+int
+d_dijkstra(
+		struct d_graph	 *graph,
+		struct d_node	 *orig,
+		struct d_node	 *dest);
+
+int
+
+d_foreach_node(
+		struct d_graph	   *g,
+		int				  (*callback)(
+								struct d_node *,
+								void *),
+		void 			   *calldata);
 
 /**
  * Print the route from the origin to the specified destination.

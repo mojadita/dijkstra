@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <avl.h>
+
 #include "dijkstra.h"
 
 #define F(_fmt) __FILE__":%d:%s: "_fmt,__LINE__,__func__
@@ -31,7 +33,15 @@ void do_help(char *prg, int code)
 	exit(code);
 }
 
-void process(FILE *f, char *name)
+int pr_route(struct d_node *nod, void *not_used)
+{
+    printf("Node %s(c=%d): ", nod->name, nod->cost);
+    d_print_route(stdout, nod);
+    puts("");
+	return 0;
+}
+
+void process(FILE *f, char *name, char *start, char *end)
 {
 	char line[256];
 	int lineno = 0;
@@ -65,8 +75,13 @@ void process(FILE *f, char *name)
                 d_lookup_node(g, to),
                 weight);
 	}
-	d_sort(g);
 	d_print_graph(g, stdout);
+	d_dijkstra(g,
+		d_lookup_node(g, start),
+		end
+			? d_lookup_node(g, end)
+			: NULL);
+    d_foreach_node(g, pr_route, NULL);
 }
 	
 
@@ -106,13 +121,16 @@ int main(int argc, char **argv)
 			}
 			process(f, is_normal_file
 					? argv[i]
-					: STDIN_NAME);
+					: STDIN_NAME,
+					source,
+					destination);
 			if (is_normal_file) {
 				fclose(f);
 			}
 		}
 	} else {
-		process(stdin, STDIN_NAME);
+		process(stdin, STDIN_NAME,
+			source, destination);
 	}
 	exit(EXIT_SUCCESS);
 }

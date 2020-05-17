@@ -6,6 +6,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -14,16 +15,19 @@
 
 #include "dijkstra.h"
 
-#define DEFAULT_CAP		2
+#define F(_fmt) __FILE__":%d:%s: "_fmt,__LINE__,__func__
+
+#define DEFAULT_CAP		    4
 
 #define FLAG_NEEDS_SORT		(1 << 0)
-#define FLAG_ALREADY_RUN	(1 << 1)
-#define FLAG_FRONTIER		(1 << 2)
+#define FLAG_NODE_REACHED	(1 << 1)
+
 
 struct d_graph {
 	AVL_TREE	   	 db;       /* database of nodes */
 	char          	*name; 	   /* name of this graph */
-	struct d_node	*frontier; /* the list of nodes in the frontier */
+	struct d_node	*fr_start; /* the list of nodes in the frontier */
+	struct d_node	*fr_end;   /* the last node of the frontier */
 	int				 nodes;	   /* num of nodes of this graph */
 };
 
@@ -65,6 +69,7 @@ d_lookup_node(
         assert(res->next != NULL);
 		res->back     = NULL;
 		res->graph    = graph;
+		res->flags	  = 0;
 		graph->nodes++;
 	}
 	return res;
@@ -150,9 +155,11 @@ d_reset(
 		if (n->flags & FLAG_NEEDS_SORT)
 			qsort(n->next, n->next_n, sizeof *n->next,
 					cmp_node);
-		n->back = NULL;
-		n->cost = 0;
-		n->flags = 0;
+
+		n->back          = NULL;
+		n->next_l        = n->next;
+		n->cost          = 0;
+		n->flags         = 0;
 	}
 }
 
@@ -177,4 +184,129 @@ d_print_graph(struct d_graph *graph, FILE *out)
 					l->to->name, l->weight);
 	}
 	return res;
+}
+
+int
+d_dijkstra(
+		struct d_graph	 *graph,
+		struct d_node	 *orig,
+		struct d_node	 *dest)
+{
+	printf(F("Reseting graph %s\n"), graph->name);
+	d_reset(graph);
+
+	printf(F("Add node %s to the frontier\n"), orig->name);
+	struct d_node *fr_first = orig;
+	struct d_node *fr_last  = orig;
+	orig->fr_next = orig->fr_prev = NULL;
+	orig->flags |= FLAG_NODE_REACHED;
+
+	int pass = 0;
+	struct d_link *cand;  /* candidate */
+    int n_nodes = 1;
+	do {
+		int cost = INT_MAX;
+
+		cand = NULL;
+		printf(F("Pass #%d START (%d nodes in the frontier)\n"),
+				++pass, n_nodes);
+
+		/* for all nodes in the frontier */
+		struct d_node *nod;
+		for (nod = fr_first; nod != NULL; nod = nod->fr_next) {
+
+			printf(F(" - Frontier Node %s:\n"), nod->name);
+			struct d_link *l;
+            struct d_link *end = nod->next + nod->next_n;
+			for (l = nod->next_l; l < end; ++l)
+			{
+				if (l->to->flags & FLAG_NODE_REACHED) {
+					nod->next_l = l + 1;
+					continue;
+				}
+				int new_cost = l->from->cost + l->weight;
+				if (new_cost < cost) {
+					cost = new_cost;
+					/* need to increment l before breaking
+					 * the loop so we don't consider this link
+					 * again */
+					cand = l;
+					printf(F("   Got a candidate: %s(c=%d) "
+							"-[w=%d]-> %s(c=%d)\n"),
+							cand->from->name, cand->from->cost,
+							cand->weight,
+							cand->to->name, cost);
+					break;
+				}
+			}
+            if (nod->next_l == end) {
+                /* we exhausted this node, unlink it from the doubly linked list */
+				printf(F("   Eliminate node %s from the frontier\n"), nod->name);
+                if (nod == fr_first) fr_first = nod->fr_next;
+                if (nod == fr_last) fr_last = nod->fr_prev;
+                if (nod->fr_prev) nod->fr_prev->fr_next = nod->fr_next;
+                if (nod->fr_next) nod->fr_next->fr_prev = nod->fr_prev;
+                /* we leave the pointers from the node out, so the
+                 * for loop still works */
+                n_nodes--;
+            }
+		} /* for (it..) */
+		if (cand) {
+			/* register the candidate's data. */
+			cand->to->cost = cost;
+			cand->to->back = cand->from;
+			cand->to->flags |= FLAG_NODE_REACHED; /* mark as visited */
+			cand->from->next_l = cand + 1; /* where we start next */
+			/* we insert it in the beginning of the frontier, so we
+			 * don't process it on this pass. */
+			cand->to->fr_prev = NULL;
+			cand->to->fr_next = fr_first;
+			cand->to->fr_next->fr_prev = cand->to;
+			fr_first = cand->to;
+			/* print the candidate selected */
+			printf(F("   Selected candidate: %s(c=%d) >=[w=%d]=> %s(c=%d)\n"),
+				cand->from->name, cand->from->cost, cand->weight,
+				cand->to->name, cand->to->cost = cost);
+			printf(F("   Adding node %s to the frontier\n"),
+					cand->to->name);
+            n_nodes++;
+		}
+	} while (cand && cand->to != dest);
+	printf(F("Pass #%d END (%d nodes in the frontier)\n"),
+			pass, n_nodes);
+	return pass;
+} /* d_dijkstra */
+
+ssize_t
+d_print_route(
+        FILE             *file,
+        struct d_node    *nod)
+{
+	ssize_t res = 0;
+	if (nod->back) {
+		res += d_print_route(file, nod->back);
+		res += fprintf(file, "->");
+	}
+	res += fprintf(file, "[%s:c=%d]",
+			nod->name, nod->cost);
+	return res;
+} /* d_print_route */
+
+int
+d_foreach_node(
+		struct d_graph		   *g,
+		int					  (*callback)(struct d_node *, void *),
+		void 				   *calldata)
+{
+	AVL_ITERATOR it;
+	for (it = avl_tree_first(g->db);
+		 it != NULL;
+		 it = avl_iterator_next(it))
+	{
+		struct d_node *nod = avl_iterator_data(it);
+		int res;
+		if (callback && (res = callback(nod, calldata)))
+			return res;
+	}
+	return 0;
 }
