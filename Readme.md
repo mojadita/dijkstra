@@ -41,3 +41,22 @@ exhausted (this allows you to specify a `NULL` node as
 destination, in that case the `d_dijkstra()` function doesn't
 have a destination node, and the minimum path to each of the
 nodes is calculated for each node.
+
+You can execute
+```
+$ dijkstra -h
+Usage: dijkstra [ -Dh ] [ -s src ] [ -d dst ] [ file ... ]
+Where options are the options below and file is one file per
+graph.
+Options:
+ -D debug.  Activates debug traces on the algorithm.
+ -d dst uses the named dst node as the destination of the
+    dijkstra algorithm.
+ -h help.  Shows this help screen.
+ -s src uses the named src node as start of the dijkstra
+    algorithm.
+File can be any readable file or '-' to indicate standard input.
+
+$ _
+```
+to get the above help screen.
