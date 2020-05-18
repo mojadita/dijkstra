@@ -1,3 +1,11 @@
+/* main.c -- main program for the Dijkstra minimum cost path
+ * discovery algorithm.
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
+ * Date: Mon May 18 14:37:40 EEST 2020
+ * Copyright: (C) 2020 Luis Colorado.  All rights reserved.
+ * License: BSD.
+ */
+
 #include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
@@ -27,10 +35,10 @@ void do_help(char *prg, int code)
         "Where options are the options below and file is one file per\n"
         "graph.\n"
         "Options:\n"
-		" -D debug.  Activates debug traces on the algorithm.\n"
+        " -D debug.  Activates debug traces on the algorithm.\n"
         " -d dst uses the named dst node as the destination of the\n"
         "    dijkstra algorithm.\n"
-		" -h help.  Shows this help screen.\n"
+        " -h help.  Shows this help screen.\n"
         " -s src uses the named src node as start of the dijkstra\n"
         "    algorithm.\n"
         "File can be any readable file or '-' to indicate standard input.\n"
@@ -85,7 +93,9 @@ void process(FILE *f, char *name, char *start, char *end)
     d_sort(g, flags);
     if (flags & D_FLAG_DEBUG)
         d_print_graph(g, stdout);
-    d_sort(g, flags);
+    d_sort(g, flags); /* just to show that a second sort just
+                       * does nothing. You can eliminate this
+                       * call */
     if (start) {
         struct d_node *snod = d_lookup_node(g, start, flags);
         if (end) {

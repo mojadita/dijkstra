@@ -1,5 +1,5 @@
-/* node.h -- node structure to allow for building weighted
- *           graphs.
+/* dijkstra.h -- node structure to allow for building weighted
+ *           	graphs for Dijkstra algorithm.
  * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Thu May 14 15:20:45 EEST 2020
  * Copyright: (C) 2020 Luis Colorado.  All rights reserved.
