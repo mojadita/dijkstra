@@ -21,3 +21,5 @@ toclean            += $(dijkstra_objs)
 
 dijkstra: $(dijkstra_deps) $(dijkstra_objs)
 	$(CC) $(LDFLAGS) $($@_ldflags) -o $@ $($@_objs) $($@_libs)
+
+$(dijkstra_objs): dijkstra.h

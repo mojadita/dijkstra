@@ -182,6 +182,23 @@ d_dijkstra(
         struct d_node    *dest,
         int               flags);
 
+/**
+ * Executes the callback function for each node.
+ *
+ * The callback function receives a reference to the involved
+ * node, plus a per call unspecified pointer.
+ *
+ * @param g is the graph to execute the callback on.
+ * @param callback is the callback routine to call.
+ * @param calldata is a void pointer to pass to every call of the
+ * callback routine.
+ * @return The routine expect each call to the callback routine
+ * to return 0 indicating successful execution.  In case one call
+ * fails, it states so by returning a nonzero status.  In that
+ * case, the function stops executing and return this last
+ * non-zero status.  If all function calls succeed, then the
+ * function returns 0.
+ */
 int
 d_foreach_node(
         struct d_graph   *g,
