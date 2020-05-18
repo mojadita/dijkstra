@@ -23,14 +23,16 @@ int flags;
 void do_help(char *prg, int code)
 {
     fprintf(stderr,
-        "Usage: %s [ opts ] [ file ... ]\n"
+        "Usage: %s [ -Dh ] [ -s src ] [ -d dst ] [ file ... ]\n"
         "Where options are the options below and file is one file per\n"
         "graph.\n"
         "Options:\n"
-        " -s src uses the named src node as start of the dijkstra\n"
-        "    algorithm.\n"
+		" -D debug.  Activates debug traces on the algorithm.\n"
         " -d dst uses the named dst node as the destination of the\n"
         "    dijkstra algorithm.\n"
+		" -h help.  Shows this help screen.\n"
+        " -s src uses the named src node as start of the dijkstra\n"
+        "    algorithm.\n"
         "File can be any readable file or '-' to indicate standard input.\n"
         "\n",
         prg);
