@@ -41,8 +41,7 @@ void do_help(char *prg, int code)
         " -h help.  Shows this help screen.\n"
         " -s src uses the named src node as start of the dijkstra\n"
         "    algorithm.\n"
-        "File can be any readable file or '-' to indicate standard input.\n"
-        "\n",
+        "File can be any readable file or '-' to indicate standard input.\n",
         prg);
     exit(code);
 }
