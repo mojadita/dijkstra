@@ -1,0 +1,4 @@
+dijkstra
+core
+*.core
+*.o
