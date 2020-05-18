@@ -11,6 +11,25 @@
 
 #include <stdio.h>
 
+#define D_FLAG_DEBUG                (1 << 0)
+#define D_FLAG_NEW_GRAPH            (1 << 1)
+#define D_FLAG_ALLOC_NODE           (1 << 2)
+#define D_FLAG_LOOKUP_NODE          (1 << 3)
+#define D_FLAG_ADD_ALREADY_IN_DB    (1 << 4)
+#define D_FLAG_ADD_INCREASING_CAP   (1 << 5)
+#define D_FLAG_ADD                  (1 << 6)
+#define D_FLAG_SORT_NODE            (1 << 7)
+#define D_FLAG_SORT_GRAPH           (1 << 8)
+#define D_FLAG_RESET_GRAPH          (1 << 9)
+#define D_FLAG_ADD_NODE_FRONTIER    (1 << 10)
+#define D_FLAG_PASS_START           (1 << 11)
+#define D_FLAG_PASS_NODE            (1 << 12)
+#define D_FLAG_PASS_ALREADY_VISITED (1 << 13)
+#define D_FLAG_PASS_GOT_CANDIDATE   (1 << 14)
+#define D_FLAG_PASS_NODE_EXHAUSTED  (1 << 15)
+#define D_FLAG_PASS_ADD_CANDIDATE   (1 << 16)
+#define D_FLAG_PASS_END             (1 << 17)
+
 struct d_graph;                /* opaque */
 
 struct d_link;                 /* link between nodes */
@@ -51,7 +70,8 @@ struct d_node {
  */
 struct d_graph *
 d_new_graph(
-        char       *name);
+        char       *name,
+        int         flags);
 
 /**
  * Add link to the graph.
@@ -73,7 +93,8 @@ struct d_link *
 d_add_link(
         struct d_node    *from,
         struct d_node    *to,
-        int               weight);
+        int               weight,
+        int               flags);
 
 /**
  * Lookup a named node in graph.
@@ -87,7 +108,8 @@ d_add_link(
 struct d_node *
 d_lookup_node(
         struct d_graph   *graph,
-        const char       *name);
+        const char       *name,
+        int               flags);
 
 /**
  * Sorts the links of the nodes from lower weight to larger.
@@ -104,7 +126,8 @@ d_lookup_node(
  */
 void
 d_sort(
-        struct d_graph          *graph);
+        struct d_graph   *graph,
+        int               flags);
 
 /**
  * Reset the node to start a new Dijkstra.
@@ -120,7 +143,8 @@ d_sort(
  */
 void
 d_reset(
-        struct d_graph   *graph);
+        struct d_graph   *graph,
+        int               flags);
 
 /**
  * Print a graph.
@@ -155,16 +179,16 @@ int
 d_dijkstra(
         struct d_graph   *graph,
         struct d_node    *orig,
-        struct d_node    *dest);
+        struct d_node    *dest,
+        int               flags);
 
 int
-
 d_foreach_node(
-        struct d_graph     *g,
-        int               (*callback)(
+        struct d_graph   *g,
+        int             (*callback)(
                                 struct d_node *,
                                 void *),
-        void               *calldata);
+        void             *calldata);
 
 /**
  * Print the route from the origin to the specified destination.

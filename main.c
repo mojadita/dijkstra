@@ -49,7 +49,7 @@ void process(FILE *f, char *name, char *start, char *end)
 {
     char line[256];
     int lineno = 0;
-    struct d_graph *g = d_new_graph(name);
+    struct d_graph *g = d_new_graph(name, flags);
 
     while (fgets(line, sizeof line, f)) {
         ++lineno;
@@ -75,22 +75,28 @@ void process(FILE *f, char *name, char *start, char *end)
             sscanf(rest, "%d", &weight);
         }
         d_add_link(
-                d_lookup_node(g, from),
-                d_lookup_node(g, to),
-                weight);
+                d_lookup_node(g, from, flags),
+                d_lookup_node(g, to, flags),
+                weight,
+                flags);
     }
-    if (flags & FLAG_PRINT_GRAPH)
+    d_sort(g, flags);
+    if (flags & D_FLAG_DEBUG)
         d_print_graph(g, stdout);
+    d_sort(g, flags);
     if (start) {
-        struct d_node *snod = d_lookup_node(g, start);
+        struct d_node *snod = d_lookup_node(g, start, flags);
         if (end) {
-            struct d_node *enod = d_lookup_node(g, end);
-            int iter = d_dijkstra(g, snod, enod);
-            printf(F("%d Iterations\n"), iter);
+            struct d_node *enod = d_lookup_node(g, end, flags);
+            int iter = d_dijkstra(g, snod, enod, flags);
+            if (flags & D_FLAG_DEBUG)
+                printf(F("%d Iterations\n"), iter);
             d_print_route(stdout, enod);
+            puts("");
         } else {
-            int iter = d_dijkstra(g, snod, NULL);
-            printf(F("%d Iterations\n"), iter);
+            int iter = d_dijkstra(g, snod, NULL, flags);
+            if (flags & D_FLAG_DEBUG)
+                printf(F("%d Iterations\n"), iter);
             d_foreach_node(g, pr_route, NULL);
         }
     }
@@ -104,10 +110,10 @@ int main(int argc, char **argv)
     char *source = NULL;
     char *destination = NULL;
 
-    while ((opt = getopt(argc, argv, "d:ghs:")) >= 0) {
+    while ((opt = getopt(argc, argv, "Dd:hs:")) >= 0) {
         switch (opt) {
+        case 'D': flags |= D_FLAG_DEBUG; break;
         case 'd': destination = optarg; break;
-        case 'g': flags |= FLAG_PRINT_GRAPH; break;
         case 'h': do_help(prog, EXIT_SUCCESS); break;
         case 's': source = optarg; break;
         }
