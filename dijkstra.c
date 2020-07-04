@@ -29,7 +29,7 @@ struct d_graph {
     struct d_node   *fr_start; /* the list of nodes in the frontier */
     struct d_node   *fr_end;   /* the last node of the frontier */
     int              nodes;    /* num of nodes of this graph */
-};
+}; /* struct d_graph */
 
 struct d_graph *
 d_new_graph(
@@ -52,7 +52,7 @@ d_new_graph(
         printf(F("Graph %s created\n"), res->name);
 
     return res;
-}
+} /* d_new_graph */
 
 struct d_node *
 d_lookup_node(
@@ -83,7 +83,7 @@ d_lookup_node(
         printf(F("Graph %s, lookup node %s => %p\n"),
             graph->name, res->name, res);
     return res;
-}
+} /* d_lookup_node */
 
 struct d_link *
 d_add_link(
@@ -133,7 +133,7 @@ d_add_link(
         printf(F("Add link from %s to %s with weight = %d\n"),
             from->name, to->name, weight);
     return res;
-}
+} /* d_add_link */
 
 static int
 cmp_node(const void *a, const void *b)
@@ -142,7 +142,7 @@ cmp_node(const void *a, const void *b)
         *A = a,
         *B = b;
     return A->weight - B->weight;
-}
+} /* cmp_node */
 
 static int
 sort_node(struct d_node *n, void *call_data)
@@ -159,7 +159,7 @@ sort_node(struct d_node *n, void *call_data)
         }
     }
     return 0;
-}
+} /* sort_node */
 
 static int
 reset_node(struct d_node *n, void *call_data)
@@ -169,7 +169,7 @@ reset_node(struct d_node *n, void *call_data)
     n->cost          = 0;
     n->flags         = 0;
     return sort_node(n, call_data);
-}
+} /* reset_node */
 
 void
 d_sort(
@@ -185,7 +185,7 @@ d_reset(
         int               flags)
 {
     d_foreach_node(graph, reset_node, &flags);
-}
+} /* d_reset */
 
 struct call_data {
     int printed_chars;
@@ -208,7 +208,7 @@ print_node(struct d_node *n, void *call_data)
                 l->to->name, l->weight);
     p->printed_chars += res;
     return 0;
-}
+} /* print_node */
 
 ssize_t
 d_print_graph(struct d_graph *graph, FILE *out)
@@ -221,7 +221,7 @@ d_print_graph(struct d_graph *graph, FILE *out)
     d_foreach_node(graph, print_node, &data);
 
     return res + data.printed_chars;
-}
+} /* d_print_graph */
 
 int
 d_dijkstra(
@@ -375,4 +375,4 @@ d_foreach_node(
             return res;
     }
     return 0;
-}
+} /* d_foreach_node */

@@ -44,7 +44,7 @@ void do_help(char *prg, int code)
         "File can be any readable file or '-' to indicate standard input.\n",
         prg);
     exit(code);
-}
+} /* do_help */
 
 int pr_route(struct d_node *nod, void *not_used)
 {
@@ -52,7 +52,7 @@ int pr_route(struct d_node *nod, void *not_used)
     d_print_route(stdout, nod);
     puts("");
     return 0;
-}
+} /* pr_route */
 
 void process(FILE *f, char *name, char *start, char *end)
 {
@@ -163,4 +163,4 @@ int main(int argc, char **argv)
             source, destination);
     }
     exit(EXIT_SUCCESS);
-}
+} /* main */
